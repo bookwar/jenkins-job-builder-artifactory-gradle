@@ -157,11 +157,13 @@ def artifactory_gradle(registry, xml_parent, data):
     resolver = XML.SubElement(artifactory, 'resolverDetails')
     artifactory_common_details(resolver, data)
 
-    resolve_snapshot = XML.SubElement(resolver, 'resolveSnapshotRepository')
-    artifactory_repository(resolve_snapshot, data, 'snapshot', prefix='resolve-')
+    if 'resolve-snapshot-repo-key' in data:
+        resolve_snapshot = XML.SubElement(resolver, 'resolveSnapshotRepository')
+        artifactory_repository(resolve_snapshot, data, 'snapshot', prefix='resolve-')
 
-    resolve_release = XML.SubElement(resolver, 'resolveReleaseRepository')
-    artifactory_repository(resolve_release, data, 'release', prefix='resolve-')
+    if 'resolve-release-repo-key' in data:
+        resolve_release = XML.SubElement(resolver, 'resolveReleaseRepository')
+        artifactory_repository(resolve_release, data, 'release', prefix='resolve-')
 
     XML.SubElement(resolver, 'stagingPlugin').text = data.get(
         'resolve-staging-plugin', '')
