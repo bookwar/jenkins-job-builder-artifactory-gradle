@@ -6,7 +6,6 @@ from jenkins_jobs.modules.helpers import artifactory_common_details
 from jenkins_jobs.modules.helpers import artifactory_deployment_patterns
 from jenkins_jobs.modules.helpers import artifactory_env_vars_patterns
 from jenkins_jobs.modules.helpers import artifactory_optional_props
-from jenkins_jobs.modules.helpers import artifactory_repository
 
 from jenkins_jobs.modules.helpers import convert_mapping_to_xml
 
@@ -46,6 +45,23 @@ def credentials_config(xml_parent, data, target):
     XML.SubElement(xml_parent, 'overridingCredentials').text = str(
         bool(cred_id)
     ).lower()
+
+def artifactory_repository(xml_parent, data, target, prefix='deploy-'):
+    if 'release' in target:
+        XML.SubElement(xml_parent, 'keyFromText').text = data.get(
+            prefix + 'release-repo-key', '')
+        XML.SubElement(xml_parent, 'keyFromSelect').text = data.get(
+            prefix + 'release-repo-key', '')
+        XML.SubElement(xml_parent, 'dynamicMode').text = str(
+            data.get(prefix + 'dynamic-mode', False)).lower()
+
+    if 'snapshot' in target:
+        XML.SubElement(xml_parent, 'keyFromText').text = data.get(
+            prefix + 'snapshot-repo-key', '')
+        XML.SubElement(xml_parent, 'keyFromSelect').text = data.get(
+            prefix + 'snapshot-repo-key', '')
+        XML.SubElement(xml_parent, 'dynamicMode').text = str(
+            data.get(prefix + 'dynamic-mode', False)).lower()
 
 
 def artifactory_gradle(registry, xml_parent, data):
@@ -142,10 +158,10 @@ def artifactory_gradle(registry, xml_parent, data):
     artifactory_common_details(resolver, data)
 
     resolve_snapshot = XML.SubElement(resolver, 'resolveSnapshotRepository')
-    artifactory_repository(resolve_snapshot, data, 'snapshot')
+    artifactory_repository(resolve_snapshot, data, 'snapshot', prefix='resolve-')
 
-    deploy_release = XML.SubElement(resolver, 'resolveReleaseRepository')
-    artifactory_repository(deploy_release, data, 'release')
+    resolve_release = XML.SubElement(resolver, 'resolveReleaseRepository')
+    artifactory_repository(resolve_release, data, 'release', prefix='resolve-')
 
     XML.SubElement(resolver, 'stagingPlugin').text = data.get(
         'resolve-staging-plugin', '')
